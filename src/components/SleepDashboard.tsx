@@ -12,21 +12,21 @@ import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 
 export const SleepDashboard = () => {
   const { entries, goal, getAverageQuality, getAverageDuration } = useSleepStore();
-
+  
   const today = new Date();
   const lastEntry = entries[0];
   const averageQuality = getAverageQuality(7);
   const averageDuration = getAverageDuration(7);
-
+  
   // Calculate streak (consecutive days with entries)
   const streak = React.useMemo(() => {
     let count = 0;
     let currentDate = new Date();
-
+    
     for (let i = 0; i < 30; i++) {
       const dateStr = format(currentDate, 'yyyy-MM-dd');
-      const hasEntry = entries.some((entry) => entry.date === dateStr);
-
+      const hasEntry = entries.some(entry => entry.date === dateStr);
+      
       if (hasEntry) {
         count++;
         currentDate = subDays(currentDate, 1);
@@ -34,18 +34,18 @@ export const SleepDashboard = () => {
         break;
       }
     }
-
+    
     return count;
   }, [entries]);
 
   const getMoodEmoji = (mood: string) => {
     switch (mood) {
-      case 'terrible':return '😫';
-      case 'poor':return '😴';
-      case 'okay':return '😐';
-      case 'good':return '😊';
-      case 'excellent':return '🌟';
-      default:return '😐';
+      case 'terrible': return '😫';
+      case 'poor': return '😴';
+      case 'okay': return '😐';
+      case 'good': return '😊';
+      case 'excellent': return '🌟';
+      default: return '😐';
     }
   };
 
@@ -55,29 +55,38 @@ export const SleepDashboard = () => {
     return 'text-red-400';
   };
 
-  const progressToGoal = Math.min(averageDuration / goal.targetDuration * 100, 100);
+  const progressToGoal = Math.min((averageDuration / goal.targetDuration) * 100, 100);
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
+    <div className="min-h-screen p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className='text-transparent text-4xl font-bold bg-clip-text from-purple-400 to-blue-400 mb-2'>睡眠管理拥有一个好睡眠
-
-        </h1>
-        <p className="text-gray-300">追踪和改善你的睡眠质量</p>
+      <div className="text-center py-6 md:py-8">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <Moon className="h-8 w-8 md:h-10 md:w-10 text-purple-400 animate-pulse-glow" />
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            睡眠管理
+          </h1>
+          <Moon className="h-8 w-8 md:h-10 md:w-10 text-blue-400 animate-pulse-glow" />
+        </div>
+        <p className="text-lg md:text-xl text-gray-300 font-medium">
+          拥有一个好睡眠 💤
+        </p>
+        <div className="mt-3 text-sm text-gray-400">
+          追踪和改善你的睡眠质量，让每一天都充满活力
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         {/* Last Night's Sleep */}
-        <Card className="sleep-card border-purple-500/20">
+        <Card className="sleep-card border-purple-500/20 hover:border-purple-400/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">昨晚睡眠</CardTitle>
             <Moon className="h-4 w-4 text-purple-400" />
           </CardHeader>
           <CardContent>
-            {lastEntry ?
-            <div>
+            {lastEntry ? (
+              <div className="animate-fade-in">
                 <div className="text-2xl font-bold text-white">
                   {Math.floor(lastEntry.duration / 60)}h {lastEntry.duration % 60}m
                 </div>
@@ -87,22 +96,22 @@ export const SleepDashboard = () => {
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-lg">{getMoodEmoji(lastEntry.mood)}</span>
                   <div className="flex">
-                    {Array.from({ length: 5 }, (_, i) =>
-                  <span key={i} className={i < lastEntry.quality ? 'text-yellow-400' : 'text-gray-600'}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <span key={i} className={i < lastEntry.quality ? 'text-yellow-400' : 'text-gray-600'}>
                         ⭐
                       </span>
-                  )}
+                    ))}
                   </div>
                 </div>
-              </div> :
-
-            <div className="text-gray-400">还没有睡眠记录</div>
-            }
+              </div>
+            ) : (
+              <div className="text-gray-400">还没有睡眠记录</div>
+            )}
           </CardContent>
         </Card>
 
         {/* Average Quality */}
-        <Card className="sleep-card border-blue-500/20">
+        <Card className="sleep-card border-blue-500/20 hover:border-blue-400/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">平均质量</CardTitle>
             <TrendingUp className="h-4 w-4 text-blue-400" />
@@ -113,13 +122,13 @@ export const SleepDashboard = () => {
             </div>
             <p className="text-xs text-gray-400">过去7天</p>
             <div className="mt-2">
-              <Progress value={averageQuality / 5 * 100} className="h-2" />
+              <Progress value={(averageQuality / 5) * 100} className="h-2" />
             </div>
           </CardContent>
         </Card>
 
         {/* Average Duration */}
-        <Card className="sleep-card border-cyan-500/20">
+        <Card className="sleep-card border-cyan-500/20 hover:border-cyan-400/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">平均时长</CardTitle>
             <Clock className="h-4 w-4 text-cyan-400" />
@@ -137,7 +146,7 @@ export const SleepDashboard = () => {
         </Card>
 
         {/* Streak */}
-        <Card className="sleep-card border-green-500/20">
+        <Card className="sleep-card border-green-500/20 hover:border-green-400/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">连续记录</CardTitle>
             <Calendar className="h-4 w-4 text-green-400" />
@@ -145,11 +154,11 @@ export const SleepDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold text-white">{streak}</div>
             <p className="text-xs text-gray-400">天</p>
-            {streak > 0 &&
-            <Badge variant="secondary" className="mt-2 bg-green-500/20 text-green-400 border-green-500/30">
+            {streak > 0 && (
+              <Badge variant="secondary" className="mt-2 bg-green-500/20 text-green-400 border-green-500/30">
                 🔥 保持下去！
               </Badge>
-            }
+            )}
           </CardContent>
         </Card>
       </div>
@@ -185,8 +194,8 @@ export const SleepDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {entries.slice(0, 5).map((entry) =>
-            <div key={entry.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            {entries.slice(0, 5).map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="text-center">
                     <div className="text-sm text-gray-400">
@@ -204,22 +213,24 @@ export const SleepDashboard = () => {
                   </div>
                 </div>
                 <div className="flex">
-                  {Array.from({ length: 5 }, (_, i) =>
-                <span key={i} className={i < entry.quality ? 'text-yellow-400' : 'text-gray-600'}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className={i < entry.quality ? 'text-yellow-400' : 'text-gray-600'}>
                       ⭐
                     </span>
-                )}
+                  ))}
                 </div>
               </div>
-            )}
-            {entries.length === 0 &&
-            <div className="text-center text-gray-400 py-8">
-                还没有睡眠记录，开始记录你的第一个睡眠吧！
+            ))}
+            {entries.length === 0 && (
+              <div className="text-center text-gray-400 py-12">
+                <Moon className="h-16 w-16 mx-auto mb-4 text-gray-600" />
+                <p className="text-lg mb-2">还没有睡眠记录</p>
+                <p className="text-sm">开始记录你的第一个睡眠吧！</p>
               </div>
-            }
+            )}
           </div>
         </CardContent>
       </Card>
-    </div>);
-
+    </div>
+  );
 };
